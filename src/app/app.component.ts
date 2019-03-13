@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import * as d3 from 'd3';
 import * as $ from 'jquery';
+import B3 from './b3/b3';
 
 @Component({
   selector: 'app-root',
@@ -10,90 +11,136 @@ import * as $ from 'jquery';
 export class AppComponent implements OnInit {
   data = [
     {
-      date: '2019-03-07',
-      value: 100,
+      pickUpDate: '2019-03-12',
+      pickUpCount: 103,
+      occupancyRate: 30.61,
+      occupancyCount: 932.92,
+      lorSum: 8558,
+      lorCount: 1133,
+      expectedPickUpRate: 6.76,
+      ticketPriceSum: 6188.78,
+      ticketPriceCount: 103,
+      vehicleClassCount: 3048,
+      store: null,
     },
     {
-      date: '2019-03-08',
-      value: 110,
+      pickUpDate: '2019-03-13',
+      pickUpCount: 127,
+      occupancyRate: 30.25,
+      occupancyCount: 922.08,
+      lorSum: 11176,
+      lorCount: 1397,
+      expectedPickUpRate: 8.33,
+      ticketPriceSum: 7731.79,
+      ticketPriceCount: 127,
+      vehicleClassCount: 3048,
+      store: null,
     },
     {
-      date: '2019-03-09',
-      value: null,
+      pickUpDate: '2019-03-14',
+      pickUpCount: 128,
+      occupancyRate: 30.99,
+      occupancyCount: 944.58,
+      lorSum: 9405,
+      lorCount: 1408,
+      expectedPickUpRate: 8.4,
+      ticketPriceSum: 7766.64,
+      ticketPriceCount: 128,
+      vehicleClassCount: 3048.08,
+      store: null,
     },
     {
-      date: '2019-03-10',
-      value: 20,
+      pickUpDate: '2019-03-15',
+      pickUpCount: 156,
+      occupancyRate: 32.63,
+      occupancyCount: 994.67,
+      lorSum: 10010,
+      lorCount: 1716,
+      expectedPickUpRate: 10.24,
+      ticketPriceSum: 10292.68,
+      ticketPriceCount: 156,
+      vehicleClassCount: 3048,
+      store: null,
     },
     {
-      date: '2019-03-11',
-      value: 220,
+      pickUpDate: '2019-03-16',
+      pickUpCount: 126,
+      occupancyRate: 33.07,
+      occupancyCount: 1008.08,
+      lorSum: 10076,
+      lorCount: 1386,
+      expectedPickUpRate: 8.27,
+      ticketPriceSum: 7639.37,
+      ticketPriceCount: 126,
+      vehicleClassCount: 3047.92,
+      store: null,
+    },
+    {
+      pickUpDate: '2019-03-17',
+      pickUpCount: 79,
+      occupancyRate: 31.28,
+      occupancyCount: 953.33,
+      lorSum: 8261,
+      lorCount: 869,
+      expectedPickUpRate: 5.18,
+      ticketPriceSum: 4469.45,
+      ticketPriceCount: 79,
+      vehicleClassCount: 3048,
+      store: null,
+    },
+    {
+      pickUpDate: '2019-03-18',
+      pickUpCount: 104,
+      occupancyRate: 28.54,
+      occupancyCount: 869.92,
+      lorSum: 9328,
+      lorCount: 1144,
+      expectedPickUpRate: 6.82,
+      ticketPriceSum: 6358.04,
+      ticketPriceCount: 104,
+      vehicleClassCount: 3048.17,
+      store: null,
     },
   ];
 
   ngOnInit(): void {
-    const container = $('#chart');
+    new B3(this.data, {
+      bindTo: '#bar',
+      axis: {
+        x: {
+          column: 'pickUpDate',
+          parser: '%Y-%m-%d',
+          formatter: '%d/%m',
+        },
+      },
+      columns: [
+        {
+          type: 'bar',
+          name: 'occupancyRate',
+          color: '#008BFF',
+        },
+        {
+          type: 'line',
+          name: 'expectedPickUpRate',
+          color: '#FFAA00',
+        },
+      ],
+    });
 
-    if (!container.width() || !container.height()) {
-      throw Error('Define the container width and height');
-    }
-
-    const margin = { top: 20, right: 20, bottom: 20, left: 20 };
-
-    const marginHorizontal = margin.left + margin.right;
-    const marginVertial = margin.top + margin.bottom;
-
-    const width = container.width() - marginHorizontal;
-    const height = container.height() - marginVertial;
-
-    const svg = d3
-      .select('#chart')
-      .append('svg')
-      .attr('width', width + marginHorizontal)
-      .attr('height', height + marginVertial)
-      .append('g');
-
-    const formatter = d3.timeFormat('%d/%m/%Y');
-    const parser = d3.timeParse('%Y-%m-%d');
-
-    const valueMax = d3.max(this.data, d => d.value);
-    const dates = this.data.map(d => d.date);
-
-    const xScale = d3
-      .scaleBand()
-      .range([marginHorizontal, width])
-      .domain(dates)
-      .padding(0.1);
-
-    const yScale = d3
-      .scaleLinear()
-      .range([height, marginVertial])
-      .domain([0, valueMax]);
-
-    const xAxis = d3.axisBottom(xScale).tickFormat(date => formatter(parser(date)));
-    const yAxis = d3.axisLeft(yScale);
-
-    d3.select('svg')
-      .append('g')
-      .attr('class', 'x axis')
-      .attr('transform', `translate(0, ${height})`)
-      .call(xAxis);
-
-    d3.select('svg')
-      .append('g')
-      .attr('class', 'y axis')
-      .attr('transform', `translate(${marginVertial}, 0)`)
-      .call(yAxis);
-
-    svg
-      .selectAll('rect')
-      .data(this.data)
-      .enter()
-      .append('rect')
-      .attr('x', d => xScale(d.date))
-      .attr('y', d => yScale(d.value))
-      .attr('width', xScale.bandwidth())
-      .attr('height', d => yScale(0) - yScale(d.value))
-      .attr('fill', 'red');
+    new B3(this.data, {
+      bindTo: '#line',
+      axis: {
+        x: {
+          column: 'pickUpDate',
+        },
+      },
+      columns: [
+        {
+          type: 'line',
+          name: 'occupancyRate',
+          color: '#008BFF',
+        },
+      ],
+    });
   }
 }
