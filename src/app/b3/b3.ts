@@ -43,6 +43,9 @@ class Chart {
   xScale: d3.ScaleBand<string>;
   yScale: d3.ScaleLinear<number, number>;
 
+  barScale: d3.ScaleBand<string>;
+  barKeys: string[] = [];
+
   svg: d3.Selection<SVGGElement, {}, HTMLElement, any>;
 
   options: Options;
@@ -119,6 +122,10 @@ class Chart {
     for (const component of this.components) {
       const d = component.getYDomain();
 
+      if (component instanceof BarComponent) {
+        this.barKeys.push(component.column.name);
+      }
+
       if (!domain) {
         domain = d;
       } else {
@@ -126,6 +133,12 @@ class Chart {
         domain[1] = Math.max(domain[1], d[1]);
       }
     }
+
+    this.barScale = d3
+      .scaleBand()
+      .domain(this.barKeys)
+      .rangeRound([0, this.xScale.bandwidth()])
+      .padding(0.05);
 
     this.yScale = d3
       .scaleLinear()
@@ -166,14 +179,18 @@ class BarComponent implements Component {
 
   render() {
     this.chart.svg
-      .selectAll('rect')
+      .append('g')
+      .selectAll('g')
       .data(this.chart.data)
-      .enter()
-      .append('rect')
-      .attr('x', d => this.chart.xScale(d[this.chart.options.axis.x.column]))
-      .attr('y', d => this.chart.yScale(d[this.column.name]))
-      .attr('width', this.chart.xScale.bandwidth())
-      .attr('height', d => this.chart.yScale(0) - this.chart.yScale(d[this.column.name]))
+      .join('g')
+      .attr('transform', d => `translate(${this.chart.xScale(d[this.chart.options.axis.x.column])}, 0)`)
+      .selectAll('rect')
+      .data(d => this.chart.barKeys.map(key => ({ key, value: d[key] })))
+      .join('rect')
+      .attr('x', d => this.chart.barScale(d.key))
+      .attr('y', d => this.chart.yScale(d.value))
+      .attr('width', this.chart.barScale.bandwidth())
+      .attr('height', d => this.chart.yScale(0) - this.chart.yScale(d.value))
       .attr('fill', d => this.column.color);
   }
 }

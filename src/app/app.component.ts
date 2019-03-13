@@ -120,7 +120,7 @@ export class AppComponent implements OnInit {
           color: '#008BFF',
         },
         {
-          type: 'line',
+          type: 'bar',
           name: 'expectedPickUpRate',
           color: '#FFAA00',
         },
@@ -136,7 +136,7 @@ export class AppComponent implements OnInit {
       },
       columns: [
         {
-          type: 'line',
+          type: 'bar',
           name: 'occupancyRate',
           color: '#008BFF',
         },
